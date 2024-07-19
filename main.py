@@ -11,6 +11,7 @@ def parse_file_name():
     parser = argparse.ArgumentParser(
         prog='keyword Parser',
         description="Finds and updates keywords wrapped with '[]' with user input")
+
     parser.add_argument("file_name", help='Name of the file to be parsed')
     file_name = parser.parse_args().file_name
 
@@ -37,12 +38,13 @@ def validate_directories():
     if not os.path.isdir(original_docx_files_path):
         raise NotADirectoryError(f"original_docx_files directory is not found within {current_path}")
 
-    if os.path.isdir(updated_docx_files_path):
-        raise NotADirectoryError(f"original_docx_files directory is not found within {current_path}")
+    if not os.path.isdir(updated_docx_files_path):
+        raise NotADirectoryError(f"updated_docx_files directory is not found within {current_path}")
 
 
 def main():
     validate_directories()
+    parse_file_name()
 
 
 if __name__ == "__main__":
