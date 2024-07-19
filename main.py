@@ -28,7 +28,7 @@ def parse_file_name():
     if file_extension.lower() != '.docx':
         raise InvalidFileTypeError(file_extension, '.docx')
 
-    return file_path
+    return file_name, file_path
 
 
 def validate_directories():
@@ -88,11 +88,15 @@ def save_replaced_text_with_formatting(document, file_path, replacements):
 
 def main():
     original_docx_files_path, updated_docx_files_path = validate_directories()
-    file_path = 'C:\\Users\\Tonyn\\Desktop\\Projects\\keyword_parser\\original_docx_files\\CV.docx'
+    file_name, file_path = parse_file_name()
     document = Document(file_path)
     keywords = extract_keywords(document)
     replacements = get_user_replacements(keywords)
-    save_replaced_text_with_formatting(document, updated_docx_files_path + '\\lif.docx', replacements)
+
+    try:
+        save_replaced_text_with_formatting(document, updated_docx_files_path + file_name, replacements)
+    except PermissionError as e:
+        print(f'Permission Error{e}\nProbably left word document open')
 
 
 if __name__ == "__main__":
