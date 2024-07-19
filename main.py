@@ -1,6 +1,7 @@
 import docx
 import argparse
 import os
+import re
 from InvalidFileTypeError import InvalidFileTypeError
 
 ORIGINAL_DOCX_FILES_DIRECTORY = 'original_docx_files'
@@ -27,7 +28,7 @@ def parse_file_name():
     if file_extension.lower() != '.docx':
         raise InvalidFileTypeError(file_extension, '.docx')
 
-    return file_name
+    return file_path
 
 
 def validate_directories():
@@ -42,9 +43,21 @@ def validate_directories():
         raise NotADirectoryError(f"updated_docx_files directory is not found within {current_path}")
 
 
+def extract_keywords(document):
+    keywords = set()
+    pattern = re.compile(r'\[(\w+)]')
+
+    for para in document.paragraphs:
+        keywords.update(pattern.findall(para.text))
+
+    return keywords
+
+
 def main():
     validate_directories()
-    parse_file_name()
+    file_path = parse_file_name()
+    document = docx.Document(file_path)
+    keywords = extract_keywords(document)
 
 
 if __name__ == "__main__":
