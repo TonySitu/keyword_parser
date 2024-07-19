@@ -53,11 +53,25 @@ def extract_keywords(document):
     return keywords
 
 
+def parse_replacements(keyword):
+    print(f'What is the replacement for keyword: {keyword}?')
+    return input('Enter the replacement: ')
+
+
+def get_user_replacements(keywords):
+    replacements = {}
+    for keyword in keywords:
+        replacement = parse_replacements(keyword)
+        replacements[keyword] = replacement
+    return replacements
+
+
 def main():
     validate_directories()
     file_path = parse_file_name()
     document = docx.Document(file_path)
     keywords = extract_keywords(document)
+    get_user_replacements(keywords)
 
 
 if __name__ == "__main__":
