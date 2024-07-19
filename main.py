@@ -1,5 +1,4 @@
 from docx import Document
-from docx.shared import Pt
 import argparse
 import os
 import re
@@ -48,10 +47,10 @@ def validate_directories():
 
 def extract_keywords(document):
     keywords = set()
-    pattern = re.compile(r'\[(\w+)]')
+    pattern = re.compile(r'\[(.*?)]')
 
     for para in document.paragraphs:
-        keywords.update(pattern.findall(para.text))
+        keywords.update(pattern.findall(para.text.replace('\n', ' ').strip()))
 
     return keywords
 
@@ -70,7 +69,7 @@ def get_user_replacements(keywords):
 
 
 def replace_keywords(text, replacements):
-    pattern = re.compile(r'\[(\w+)]')
+    pattern = re.compile(r'\[(.*?)]')
 
     def replacer(match):
         keyword = match.group(1)
@@ -79,53 +78,12 @@ def replace_keywords(text, replacements):
     return pattern.sub(replacer, text)
 
 
-def process_doc(document, replacements):
-    formatted_text = []
+def save_replaced_text_with_formatting(document, file_path, replacements):
     for para in document.paragraphs:
-        para_info = {
-            'paragraph_style': para.style.name,
-            'alignment': para.alignment,
-            'runs': []}
-
         for run in para.runs:
-            run_info = {
-                'text': run.text,
-                'bold': run.bold,
-                'italic': run.italic,
-                'underline': run.underline,
-                'font_name': run.font.name,
-                'font_size': run.font.size.pt if run.font.size else None,
-                'color': run.font.color.rgb if run.font.color and run.font.color.rgb else None
-            }
-            para_info['runs'].append(run_info)
-        formatted_text.append(para_info)
+            run.text = replace_keywords(run.text, replacements)
 
-    return formatted_text
-
-
-def save_replaced_text_with_formatting(file_path, formatted_text):
-    doc = Document()
-
-    for para_info in formatted_text:
-        para = doc.add_paragraph(style=para_info['paragraph_style'])
-        para.alignment = para_info['alignment']
-
-        for run_info in para_info['runs']:
-            run = para.add_run(run_info['text'])
-            if run_info['bold']:
-                run.bold = run_info['bold']
-            if run_info['italic']:
-                run.italic = run_info['italic']
-            if run_info['underline']:
-                run.underline = run_info['underline']
-            if run_info['font_name']:
-                run.font.name = run_info['font']
-            if run_info['font_size']:
-                run.font.size = Pt(run_info['font_size'])
-            if run_info['color']:
-                run.font.color.rgb = run_info['color']
-
-    doc.save(file_path)
+    document.save(file_path)
 
 
 def main():
@@ -134,8 +92,7 @@ def main():
     document = Document(file_path)
     keywords = extract_keywords(document)
     replacements = get_user_replacements(keywords)
-    formatted_text = process_doc(document, replacements)
-    save_replaced_text_with_formatting(updated_docx_files_path + '\\lif.docx', formatted_text)
+    save_replaced_text_with_formatting(document, updated_docx_files_path + '\\lif.docx', replacements)
 
 
 if __name__ == "__main__":
