@@ -1,5 +1,4 @@
 from docx import Document
-import argparse
 import os
 import re
 from InvalidFileTypeError import InvalidFileTypeError
@@ -8,13 +7,8 @@ ORIGINAL_DOCX_FILES_DIRECTORY = 'original_docx_files'
 UPDATED_DOCX_FILES_DIRECTORY = 'updated_docx_files'
 
 
-def parse_file_name():
-    parser = argparse.ArgumentParser(
-        prog='keyword Parser',
-        description="Finds and updates keywords wrapped with '[]' with user input")
-
-    parser.add_argument("file_name", help='Name of the file to be parsed')
-    file_name = parser.parse_args().file_name
+def parse_file_to_process():
+    file_name = input("File name: ")
 
     current_path = os.path.dirname(os.path.realpath(__file__))
     directory_path = os.path.join(current_path, ORIGINAL_DOCX_FILES_DIRECTORY)
@@ -31,6 +25,21 @@ def parse_file_name():
     return file_name, file_path
 
 
+def parse_updated_file():
+    file_name = input("File name: ")
+
+    current_path = os.path.dirname(os.path.realpath(__file__))
+    directory_path = os.path.join(current_path, UPDATED_DOCX_FILES_DIRECTORY)
+    file_path = os.path.join(directory_path, file_name)
+
+    _, file_extension = os.path.splitext(file_path)
+
+    if file_extension.lower() != '.docx':
+        raise InvalidFileTypeError(file_extension, '.docx')
+
+    return file_path
+
+
 def validate_directories():
     current_path = os.path.dirname(os.path.realpath(__file__))
     original_docx_files_path = os.path.join(current_path, 'original_docx_files')
@@ -41,8 +50,6 @@ def validate_directories():
 
     if not os.path.isdir(updated_docx_files_path):
         raise NotADirectoryError(f"updated_docx_files directory is not found within {current_path}")
-
-    return original_docx_files_path, updated_docx_files_path
 
 
 def extract_keywords(document):
@@ -83,20 +90,22 @@ def save_replaced_text_with_formatting(document, file_path, replacements):
         for run in para.runs:
             run.text = replace_keywords(run.text, replacements)
 
-    document.save(file_path)
+    try:
+        document.save(file_path)
+    except PermissionError as e:
+        print(f'Permission Error{e}\nProbably left word document open')
 
 
 def main():
-    original_docx_files_path, updated_docx_files_path = validate_directories()
-    file_name, file_path = parse_file_name()
+    validate_directories()
+    print("Please input the name of the file you'd like to process")
+    file_name, file_path = parse_file_to_process()
     document = Document(file_path)
     keywords = extract_keywords(document)
     replacements = get_user_replacements(keywords)
-
-    try:
-        save_replaced_text_with_formatting(document, updated_docx_files_path + file_name, replacements)
-    except PermissionError as e:
-        print(f'Permission Error{e}\nProbably left word document open')
+    print("Please input the name of the new file")
+    new_file_path = parse_updated_file()
+    save_replaced_text_with_formatting(document, new_file_path, replacements)
 
 
 if __name__ == "__main__":
