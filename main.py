@@ -98,7 +98,7 @@ def save_replaced_text_with_formatting(document, file_path, replacements):
 
 def main():
     validate_directories()
-    print("Please input the name of the file you'd like to process")
+    print("Please input the name of the file you'd like to process: ")
     file_name, file_path = parse_file_to_process()
     document = Document(file_path)
     keywords = extract_keywords(document)
