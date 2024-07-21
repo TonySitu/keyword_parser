@@ -1,0 +1,4 @@
+install pip
+install python-docx using command 'pip install python-docx' or 'python -m pip install python-docx' if in cmd
+main command 'python main.py' in the terminal
+place docx file into 'original_docx_files' for processing
