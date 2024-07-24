@@ -35,7 +35,7 @@ def parse_updated_file():
     _, file_extension = os.path.splitext(file_path)
 
     if file_extension.lower() != '.docx':
-        raise InvalidFileTypeError(file_extension, '.docx')
+        file_path += '.docx'
 
     return file_path
 
